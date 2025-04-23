@@ -3,105 +3,98 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jeu QR Code</title>
+  <title>Formulaire de Jeu</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #111;
-      color: #fff;
       text-align: center;
-      padding: 2em;
     }
-    h1 {
-      font-size: 2em;
-      animation: fadeIn 1.5s ease-in-out;
+    .form-container {
+      margin-top: 20px;
     }
-    ul {
-      list-style: none;
-      padding: 0;
-      font-size: 1.2em;
+    .input-field {
+      padding: 10px;
+      margin: 10px;
+      width: 250px;
+      font-size: 16px;
     }
-    li {
-      margin: 1em 0;
-      animation: slideIn 0.5s ease forwards;
+    .btn {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
     }
-    .cam-flash {
-      width: 100%;
-      height: 100vh;
-      background: #fff;
-      position: fixed;
-      top: 0;
-      left: 0;
-      opacity: 0;
-      z-index: 9999;
-      pointer-events: none;
-      animation: camFlash 0.8s ease-in-out 2s forwards;
-    }
-    @keyframes camFlash {
-      0% { opacity: 0; }
-      50% { opacity: 1; }
-      100% { opacity: 0; }
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    .info-display {
+      display: none;
+      margin-top: 20px;
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
-  <div class="cam-flash"></div>
-  <h1>Merci d'avoir scanné le QR code !</h1>
-  <p>Vous pensiez que ce QR code était anodin ? Voici ce que nous avons pu apprendre sur vous...</p>
-  <ul id="infos"></ul>
+  <h1>Bienvenue au jeu !</h1>
+  <p>Entrez votre adresse e-mail pour participer :</p>
+
+  <div class="form-container">
+    <input type="email" id="email" class="input-field" placeholder="Votre e-mail" required />
+    <button class="btn" id="submitBtn">Soumettre</button>
+  </div>
+
+  <div class="info-display" id="infoDisplay">
+    <h2>Voici les informations collectées :</h2>
+    <p id="userInfo"></p>
+  </div>
 
   <script>
-    async function getClientInfo() {
-      const infoList = document.getElementById('infos');
-      const urlParams = new URLSearchParams(window.location.search);
-      const userID = urlParams.get('user') || 'Inconnu';
-      const userAgent = navigator.userAgent;
-      const language = navigator.language;
-      const platform = navigator.platform;
-      let ip = '...';
-
-      infoList.innerHTML = `
-        <li><strong>ID utilisateur :</strong> ${userID}</li>
-        <li><strong>Appareil :</strong> ${platform}</li>
-        <li><strong>Navigateur :</strong> ${userAgent}</li>
-        <li><strong>Langue :</strong> ${language}</li>
-        <li><strong>Adresse IP :</strong> en cours...</li>
-      `;
-
-      try {
-        const response = await fetch('https://api.ipify.org?format=json');
-        const data = await response.json();
-        ip = data.ip;
-        infoList.querySelectorAll('li')[4].innerHTML = `<strong>Adresse IP :</strong> ${ip}`;
-      } catch (err) {
-        console.error('Erreur IP:', err);
-      }
-
-      // ENREGISTREMENT VERS GOOGLE SHEET via webhook Apps Script
-      fetch('https://script.google.com/macros/s/AKfycbyT1nldRYrrQTrerUPAGbu01u4sbItED8SR21UsbgV1tjWa-be8eqgMbSFODt5PLcTg/exec', {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: userID,
-          ip: ip,
-          userAgent: userAgent,
-          platform: platform,
-          language: language,
-          timestamp: new Date().toISOString()
+    document.getElementById('submitBtn').addEventListener('click', function() {
+      const email = document.getElementById('email').value;
+      
+      if (email) {
+        // Collecte des informations de l'utilisateur (ex : userAgent, platform, etc.)
+        const userAgent = navigator.userAgent;
+        const platform = navigator.platform;
+        const language = navigator.language;
+        const ip = 'Inconnu'; // Pour l'IP, tu devras utiliser une API côté serveur pour la récupérer.
+        const timestamp = new Date().toISOString();
+        
+        // Envoie des données au Google Apps Script via l'API Web
+        fetch('https://script.google.com/macros/s/AKfycbzKcltMaWzj5l7Ca6inwmx6-Ikl86dAyFC2TDLyGlpo0acf6Z5MP9XsKZduHyalLKzg/exec', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: email,
+            id: 'test',
+            ip: ip,
+            userAgent: userAgent,
+            platform: platform,
+            language: language,
+            timestamp: timestamp
+          })
         })
-      });
-    }
-
-    getClientInfo();
+        .then(response => response.json())
+        .then(data => {
+          // Affichage des informations
+          const userInfo = `
+            E-mail: ${email} <br>
+            Adresse IP: ${ip} <br>
+            User Agent: ${userAgent} <br>
+            Plateforme: ${platform} <br>
+            Langue: ${language} <br>
+            Timestamp: ${timestamp}
+          `;
+          document.getElementById('userInfo').innerHTML = userInfo;
+          document.getElementById('infoDisplay').style.display = 'block';
+        })
+        .catch(error => {
+          alert('Une erreur est survenue. Veuillez réessayer.');
+        });
+      } else {
+        alert("Veuillez entrer une adresse e-mail valide.");
+      }
+    });
   </script>
 </body>
 </html>
