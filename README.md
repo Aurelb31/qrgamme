@@ -59,7 +59,7 @@
         const timestamp = new Date().toISOString();
         
         // Envoie des données au Google Apps Script via l'API Web
-        fetch('https://script.google.com/macros/s/AKfycby6Jtvdl_0qzksi8Oh_I8-lzntboio9XZRYxxlFkXDa0zGTWlb9Aa-VR8cVGk-KR6A8/exec', {
+        fetch('https://script.google.com/macros/s/AKfycbzi4uw6bbB5I5oto8Q4_A9IM0W1j3WfFA4q-YkHrcMojJnYsOLujzt0f_v-N8k0Zqmb/exec', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
