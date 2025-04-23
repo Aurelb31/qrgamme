@@ -88,7 +88,7 @@
       // ENREGISTREMENT VERS GOOGLE SHEET via webhook Apps Script
       fetch('https://script.google.com/macros/s/AKfycbyeIWjJc7y7eZm6AbLORbswcmGcWmzDMB3nks2n1197Ip2K-UzLdy6AKzw751z0cD24/exec', {
         method: 'POST',
-        mode: 'cors',
+        mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: userID,
